@@ -6,11 +6,11 @@ Have you ever wanted to push your script files from your computer to Roblox Stud
 Well with CreeperCLI, you can do that. It's extremely simple, and it's easier to use than Rojo.
 
 ## Supported FileTypes
-#### `*.lua` ~~------>~~ ModuleScript
+#### `*.lua` ~~------------->~~ ModuleScript
 #### `*.server.lua` ~~------>~~ Script
 #### `*.client.lua` ~~------>~~ LocalScript
-#### `*.json` ~~------>~~ ModuleScript
-`.json` files will try to automatically be converted to modules.
+#### `*.json` ~~------------>~~ ModuleScript
+*(JSON files will try to automatically be converted to modules.)*
 
 ## How do I use it?
 It's really simple. Follow a few steps and you'll be right on track!
@@ -23,6 +23,7 @@ It's really simple. Follow a few steps and you'll be right on track!
 > - Download CreeperCLI.
 > - Put it somewhere safe (where you won't delete it).
 > - Add the directory path to your [Environment Variables](https://www.computerhope.com/issues/ch000549.htm).
+> 
 > Start/Restart the terminal and in your game's directory.
 > Then use the exe's name (e.g. `creeper_cli`) to start the server.
 
@@ -38,7 +39,7 @@ It's really simple. Follow a few steps and you'll be right on track!
 
 ##### Not Connected vs. Connected:
 
-![alt text](images/RobloxStudioBeta_4cA8vUwEeT.png)! vs. [alt text](images/RobloxStudioBeta_v9dS4JnNBx.png)
+![alt text](images/RobloxStudioBeta_4cA8vUwEeT.png) vs. ![alt text](images/RobloxStudioBeta_v9dS4JnNBx.png)
 
 ## Game / Tree / Root
 CreeperCLI uses a tree sort of interface. The same way that the Roblox Explorer does.
@@ -59,6 +60,6 @@ It would get translated to this in studio:
 > [!CAUTION]
 > If you spell a folder or file incorrectly, it will not line up correctly with in-game folders.
 > 
-> CreeperCLI will create a new folder for any name it cannot find.
+> **CreeperCLI will create a new folder for any name it cannot find.**
 
 Have fun creating, and also report any issues on the [Issues](https://github.com/creepersaur/CreeperCLI-2/issues) tab or through Discord.

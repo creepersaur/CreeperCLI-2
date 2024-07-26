@@ -1,9 +1,16 @@
 # CreeperCLI 2
--# Not affiliated with Rojo, or the Rojo team.
+*(Not affiliated with Rojo, or the Rojo team.)*
 
 ## What is it?
 Have you ever wanted to push your script files from your computer to Roblox Studio directly?
 Well with CreeperCLI, you can do that. It's extremely simple, and it's easier to use than Rojo.
+
+## Supported FileTypes
+#### `*.lua` ~~       >~~ ModuleScript
+#### `*.server.lua` ~~       >~~ Script
+#### `*.client.lua` ~~       >~~ LocalScript
+#### `*.json` ~~       >~~ ModuleScript
+`.json` files will try to automatically be converted to modules.
 
 ## How do I use it?
 It's really simple. Follow a few steps and you'll be right on track!
@@ -26,9 +33,18 @@ It's really simple. Follow a few steps and you'll be right on track!
 - Run the `.exe` **first**.
 - Open the plugin from the Plugins tab, and click `Connect`.
 
+[!INFO]
+> Attempting to connect the plugin before running the server will result in an error.
+
+Not Connected vs. Connected
+
+![alt text](images/RobloxStudioBeta_4cA8vUwEeT.png)![alt text](images/RobloxStudioBeta_v9dS4JnNBx.png)
+
 ## Game / Tree / Root
 CreeperCLI uses a tree sort of interface. The same way that the Roblox Explorer does.
+
 The `game` folder is the starting of the tree, or the `root`.
+
 Any folders or scripts you add in here, will be translated to folders and scripts in Roblox Studio.
 Hence if I wanted to put a script inside of `ServerScriptService`, I'd need to setup my tree like this:
 ```md
@@ -37,8 +53,10 @@ Hence if I wanted to put a script inside of `ServerScriptService`, I'd need to s
       - Hello.server.luau
 ```
 It would get translated to this in studio:
+
 ![alt text](images/RobloxStudioBeta_OPlLVnfi0A.png)
 
 > [!CAUTION]
 > If you spell a folder or file incorrectly, it will not line up correctly with in-game folders.
+> 
 > CreeperCLI will create a new folder for any name it cannot find.

@@ -1,0 +1,1 @@
+return "Hello, from the CreeperCLI. (module)"

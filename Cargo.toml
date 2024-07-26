@@ -1,0 +1,9 @@
+[package]
+name = "creeper_cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "*"
+colored = "2.1.0"
+serde_json = "*"

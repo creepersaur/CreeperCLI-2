@@ -1,0 +1,44 @@
+# CreeperCLI 2
+-# Not affiliated with Rojo, or the Rojo team.
+
+## What is it?
+Have you ever wanted to push your script files from your computer to Roblox Studio directly?
+Well with CreeperCLI, you can do that. It's extremely simple, and it's easier to use than Rojo.
+
+## How do I use it?
+It's really simple. Follow a few steps and you'll be right on track!
+### Installation
+- Get the CreeperCLI plugin from the [Roblox Creator Store](https://create.roblox.com/store/asset/18662197402/CreeperCLI-2).
+- Get the latest release of the `.exe` file. By going to the [Releases](https://github.com/creepersaur/CreeperCLI-2/releases) tab. (Or from the source code)
+
+> [!TIP]
+> Keep in mind, that you can either put the `.exe` file inside the folder and run it, or do the following:
+> - Download CreeperCLI.
+> - Put it somewhere safe (where you won't delete it).
+> - Add the directory path to your [Environment Variables](https://www.computerhope.com/issues/ch000549.htm).
+> Start/Restart the terminal and in your game's directory.
+> Then use the exe's name (e.g. `creeper_cli`) to start the server.
+
+### Running
+- Create an empty folder
+- Put the `.exe` inside (or use the tip above).
+- Create a new `game` folder.
+- Run the `.exe` **first**.
+- Open the plugin from the Plugins tab, and click `Connect`.
+
+## Game / Tree / Root
+CreeperCLI uses a tree sort of interface. The same way that the Roblox Explorer does.
+The `game` folder is the starting of the tree, or the `root`.
+Any folders or scripts you add in here, will be translated to folders and scripts in Roblox Studio.
+Hence if I wanted to put a script inside of `ServerScriptService`, I'd need to setup my tree like this:
+```md
+# game
+  - ServerScriptService
+      - Hello.server.luau
+```
+It would get translated to this in studio:
+![alt text](images/RobloxStudioBeta_OPlLVnfi0A.png)
+
+> [!CAUTION]
+> If you spell a folder or file incorrectly, it will not line up correctly with in-game folders.
+> CreeperCLI will create a new folder for any name it cannot find.

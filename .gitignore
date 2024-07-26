@@ -1,3 +1,5 @@
 /target
 /src_roblox
 /build
+.gitignore
+selene.toml

@@ -60,3 +60,5 @@ It would get translated to this in studio:
 > If you spell a folder or file incorrectly, it will not line up correctly with in-game folders.
 > 
 > CreeperCLI will create a new folder for any name it cannot find.
+
+Have fun creating, and also report any issues on the [Issues](https://github.com/creepersaur/CreeperCLI-2/issues) tab or through Discord.

@@ -62,4 +62,11 @@ It would get translated to this in studio:
 > 
 > **CreeperCLI will create a new folder for any name it cannot find.**
 
+## Compiling CreeperCLI
+- Install rust + cargo (through rustup).
+- Install Rust Visual Studio Prerequisites (rustup should've done that already).
+- Download the source code and check if cargo is working (use `cargo init`).
+- Run `cargo build` to compile it. (use `cargo run` to run the `.exe` immediately).
+- The `.exe` file should be the `target/debug/creeper_cli.exe` file.
+
 Have fun creating, and also report any issues on the [Issues](https://github.com/creepersaur/CreeperCLI-2/issues) tab or through Discord.

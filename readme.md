@@ -34,7 +34,8 @@ It's really simple. Follow a few steps and you'll be right on track!
 - Run the `.exe` **first**.
 - Open the plugin from the Plugins tab, and click `Connect`.
 
-> [!INFO]
+> [!INFO]![Library](https://github.com/user-attachments/assets/f11e1a62-fcd8-4fa4-8b98-88d7986d2e98)
+
 > Attempting to connect the plugin before running the server will result in an error.
 
 ##### Not Connected vs. Connected:
@@ -69,4 +70,4 @@ It would get translated to this in studio:
 - Run `cargo build` to compile it. (use `cargo run` to run the `.exe` immediately).
 - The `.exe` file should be the `target/debug/creeper_cli.exe` file.
 
-Have fun creating, and also report any issues on the [Issues](https://github.com/creepersaur/CreeperCLI-2/issues) tab or through Discord.
+Have fun creating, and also report any issues on the [Issues](https://github.com/creepersaur/CreeperCLI-2/issues) tab or through the devforum post.

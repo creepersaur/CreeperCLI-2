@@ -39,7 +39,7 @@ It's really simple. Follow a few steps and you'll be right on track!
 - Run the `.exe` **first**.
 - Open the plugin from the Plugins tab, and click `Connect`.
 
-> [!INFO]![Library](https://github.com/user-attachments/assets/f11e1a62-fcd8-4fa4-8b98-88d7986d2e98)
+> [!INFO]
 
 > Attempting to connect the plugin before running the server will result in an error.
 

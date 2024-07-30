@@ -1,6 +1,6 @@
 ![CreeperCLI_logo|368x222](https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/5X/5/e/0/7/5e07696f33d64fde05514675fc4b1e076038dfa0.png)
 
-[![GitHub](https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/5X/5/9/b/4/59b460d81575f3e5e7cfa409ee04c8975d25bc47.svg)](https://github.com/creepersaur/CreeperCLI-2/tree/master) [!Creator Store](https://devforum.roblox.com/secure-uploads/uploads/original/5X/5/1/2/c/512c4b80386585424e94f5fd08ed05f70484cb17.png)](https://create.roblox.com/store/asset/18662197402/CreeperCLI-2)
+[![GitHub](https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/5X/5/9/b/4/59b460d81575f3e5e7cfa409ee04c8975d25bc47.svg)](https://github.com/creepersaur/CreeperCLI-2/tree/master) [![Creator Store](https://devforum.roblox.com/secure-uploads/uploads/original/5X/5/1/2/c/512c4b80386585424e94f5fd08ed05f70484cb17.png)](https://create.roblox.com/store/asset/18662197402/CreeperCLI-2)
 
 ## What is it?
 Have you ever wanted to push your script files from your computer to Roblox Studio directly?

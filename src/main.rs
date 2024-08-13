@@ -1,6 +1,6 @@
 use std::path::Path;
-
 use colored::Colorize;
+
 use filesystem::get_cwd;
 use server::run_server;
 

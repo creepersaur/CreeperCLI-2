@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{io::stdin, path::Path};
 use colored::Colorize;
 
 use filesystem::get_cwd;
@@ -20,6 +20,7 @@ async fn main() -> std::io::Result<()> {
             "{}",
             "YOU MUST HAVE A `game` DIRECTORY IN THE WORKING DIRECTORY.".red()
         );
+        stdin().read_line(&mut String::new()).expect("Failed to read_line.");
         return Ok(());
     }
 

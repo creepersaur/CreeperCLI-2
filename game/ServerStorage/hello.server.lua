@@ -1,5 +1,1 @@
-print('OMG')
----- PLUH
-
---- GRRR
--- oh hello
+print("Hello CreeperCLI from ServerStorage")

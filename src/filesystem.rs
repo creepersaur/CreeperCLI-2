@@ -1,14 +1,14 @@
 use std::env;
-use std::fmt::Error;
 use std::fs;
+use std::path::PathBuf;
 use colored::Colorize;
 use serde_json::json;
 use toml::Table;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileTree {
-    File(String, String),             // (path, content)
-    Directory(String, Vec<FileTree>), // (path, files)
+    File(PathBuf, String),             // (path, content)
+    Directory(PathBuf, Vec<FileTree>), // (path, files)
 }
 
 pub fn get_tree(root: &str) -> Vec<FileTree> {
@@ -16,19 +16,19 @@ pub fn get_tree(root: &str) -> Vec<FileTree> {
 
     for i in get_files(root).unwrap() {
         if i.1 {
-            tree.push(FileTree::Directory(i.0.clone(), get_tree(&i.0)));
+            tree.push(FileTree::Directory(i.0.clone(), get_tree(&i.0.to_string_lossy())));
         } else {
             let mut path = i.0;
             let mut content = fs::read_to_string(&path).expect("Failed to get file content.");
-            let (_, extension) = split_file_path(&path);
+            let extension = path.extension().expect("Failed to get path extension!");
 
             if extension == "toml" {
                 let parsed = content.parse::<Table>();
                 if let Ok(parsed) = parsed {
                     content = json!(parsed).to_string();
-                    path.replace_range(path.len() - 4.., "json");
+                    path.set_extension("toml");
                 } else {
-                    println!("{}{}", "Unable to parse `toml` file: ".red(), path.blue());
+                    println!("{}{}", "Unable to parse `toml` file: ".red(), path.to_str().unwrap().blue());
                     continue;
                 }
             }
@@ -40,21 +40,20 @@ pub fn get_tree(root: &str) -> Vec<FileTree> {
     tree
 }
 
-pub fn get_files(path: &str) -> Result<Vec<(String, bool)>, Error> {
-    let paths = fs::read_dir(path).expect("Failed to get files.");
-    let mut children: Vec<(String, bool)> = vec![];
 
-    for path in paths {
-        let path = path.expect("DirEntry error.").path();
-
-        let mut is_dir = false;
-        if let Ok(metadata) = fs::metadata(path.clone()) {
-            is_dir = metadata.is_dir();
-        }
-
-        children.push((path.to_str().unwrap().to_string(), is_dir));
-    }
-
+pub fn get_files(path: &str) -> Result<Vec<(PathBuf, bool)>, ()> {
+    let children = fs::read_dir(path)
+        .map_err(|_| ())?  // Failed to get files, return Error
+        .into_iter()
+        .scan((), |_, x| {  // Scan does create an iterator that skips if closure returns None
+            if let Ok(x) = x { // If it is a valid DirEntry (Not an error)
+                let path = x.path(); // Get path
+                let is_dir = x.path().is_dir();  // Get boolean
+                return Some((path, is_dir))  // Add entry to the scan iter
+            }
+            None  // If it is a DirEntry Error, yeet the file from the list
+        })
+        .collect();  // Collect into the vector
     Ok(children)
 }
 
@@ -67,23 +66,3 @@ pub fn get_cwd() -> String {
 
     cwd
 }
-
-pub fn split_file_path(path: &str) -> (String, String) {
-    let mut split: Vec<&str> = path.split(".").collect();
-
-    let extension = split
-        .last()
-        .expect("Failed to get extension?")
-        .to_string();
-
-    split.remove(split.len() - 1);
-    let file_name = split.join(".");
-
-    (file_name, extension)
-}
-
-
-    // let path = Path::new(path);
-    // let file_name = path.file_name().and_then(|s| s.to_str()).map(String::from);
-    // let extension = path.extension().and_then(|s| s.to_str()).map(String::from);
-    // (file_name.unwrap(), extension.unwrap())

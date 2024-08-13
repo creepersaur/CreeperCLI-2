@@ -2,7 +2,6 @@ use crate::filesystem::{self, FileTree};
 use actix_web::{http::header, HttpResponse, Responder};
 use serde_json::{json, Value};
 use std::collections::HashMap;
-
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
@@ -28,20 +27,23 @@ pub async fn get() -> impl Responder {
         .body(map_tree(tree))
 }
 
-fn map_tree(tree: Vec<FileTree>) -> String {
+pub fn map_tree(tree: Vec<FileTree>) -> String {
     let file_types = vec!["luau", "lua", "json", "toml"];
     let mut file_structure = HashMap::new();
 
     for i in tree {
         if let FileTree::File(path, content) = i {
-            let (name, extension) = filesystem::split_file_path(&path);
+            let (name, extension) = (
+                path.file_stem().expect("Failed to get file_name").to_str().unwrap(),
+                path.extension().expect("Failed to get extension!")
+            );
 
-            if file_types.contains(&extension.as_str()) {
+            if file_types.contains(&extension.to_str().unwrap()) {
                 file_structure.insert(format!("{name}"), content);
             }
         } else if let FileTree::Directory(path, files) = i {
-            let new_path : &mut str = &mut path.to_string();
-            let game_index = path.find("game").unwrap();
+            let new_path = path.to_string_lossy();
+            let game_index = new_path.find("game").unwrap();
             let (_, end) = new_path.split_at(game_index);
 
             file_structure.insert(end.to_string(), map_tree(files));

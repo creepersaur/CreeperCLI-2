@@ -1,0 +1,6 @@
+allow_delete = [
+    'ServerScriptService',
+    'ServerStorage',
+    'ReplicatedStorage',
+    'StarterPlayer',
+]

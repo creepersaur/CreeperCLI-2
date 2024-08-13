@@ -31,12 +31,15 @@ pub fn map_tree(tree: Vec<FileTree>) -> String {
 
     for i in tree {
         if let FileTree::File(path, content) = i {
-            let (name, _) = (
-                path.file_stem().expect("Failed to get file_name").to_str().unwrap(),
+            let (mut name, extension) = (
+                path.file_stem().expect("Failed to get file_name").to_str().unwrap().to_string(),
                 path.extension().expect("Failed to get extension!")
             );
 
-            file_structure.insert(format!("{name}"), content);
+            if extension == "toml" || extension == "json" {
+                name = format!("{name}.json");
+            }
+            file_structure.insert(name, content);
         } else if let FileTree::Directory(path, files) = i {
             let new_path = path.to_string_lossy();
             let game_index = new_path.find("game").unwrap();

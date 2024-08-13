@@ -16,6 +16,8 @@ pub async fn post(body: String) -> impl Responder {
             .body(
                 map_tree(filesystem::get_game_files())
             )
+    } else if data[0] == "__DELETED__" {
+        println!("{} was just deleted!!!", data[1].to_string().red());
     }
-    HttpResponse::Ok().body("Hello")
+    HttpResponse::Ok().body("{Hello}")
 }

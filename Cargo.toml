@@ -9,3 +9,9 @@ colored = "2.1.0"
 serde_json = "*"
 toml = "*"
 lazy_static = "1.4.0"
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3

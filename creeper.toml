@@ -1,6 +1,1 @@
-allow_delete = [
-    'ServerScriptService',
-    'ServerStorage',
-    'ReplicatedStorage',
-    'StarterPlayer',
-]
+port = 1234

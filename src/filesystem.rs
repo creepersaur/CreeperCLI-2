@@ -40,6 +40,11 @@ pub fn get_tree(root: &str) -> Vec<FileTree> {
     tree
 }
 
+pub fn get_game_files() -> Vec<FileTree> {
+    let cwd = get_cwd();
+    let game = format!("{cwd}\\game");
+    get_tree(game.as_str())
+}
 
 pub fn get_files(path: &str) -> Result<Vec<(PathBuf, bool)>, ()> {
     let children = fs::read_dir(path)

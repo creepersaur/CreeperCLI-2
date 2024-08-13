@@ -11,13 +11,11 @@ pub async fn post(body: String) -> impl Responder {
     if data[0] == "__INIT__" {
         println!("{} {} {} connection established!", data[1].to_string().split("\"").collect::<String>(), "|".dimmed(), "CreeperCLI".blue());
 
-        let cwd = filesystem::get_cwd();
-        let game = format!("{cwd}\\game");
-        let tree = filesystem::get_tree(game.as_str());
-
         return HttpResponse::Ok()
             .append_header((header::CONTENT_TYPE, "application/json"))
-            .body(map_tree(tree))
+            .body(
+                map_tree(filesystem::get_game_files())
+            )
     }
     HttpResponse::Ok().body("Hello")
 }

@@ -1,9 +1,14 @@
 use std::env;
 use std::fs;
-use std::path::PathBuf;
+use std::io::Write;
+use std::path::{Path, PathBuf};
 use colored::Colorize;
 use serde_json::json;
 use toml::Table;
+use fs::File;
+use unescape::unescape;
+
+use crate::get::GLOBAL_DATA;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileTree {
@@ -18,7 +23,7 @@ pub fn get_tree(root: &str) -> Vec<FileTree> {
         if i.1 {
             tree.push(FileTree::Directory(i.0.clone(), get_tree(&i.0.to_string_lossy())));
         } else {
-            let mut path = i.0;
+            let path = i.0;
             let mut content = fs::read_to_string(&path).expect("Failed to get file content.");
             let extension = path.extension().expect("Failed to get path extension!");
 
@@ -26,7 +31,6 @@ pub fn get_tree(root: &str) -> Vec<FileTree> {
                 let parsed = content.parse::<Table>();
                 if let Ok(parsed) = parsed {
                     content = json!(parsed).to_string();
-                    path.set_extension("toml");
                 } else {
                     println!("{}{}", "Unable to parse `toml` file: ".red(), path.to_str().unwrap().blue());
                     continue;
@@ -73,31 +77,63 @@ pub fn get_cwd() -> String {
 }
 
 pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
-    let split_first = path.split_off(1);
-    let collection: Vec<&str> = split_first.split(".").collect();
-    let mut last_path = collection.clone();
-    last_path.pop(); // More idiomatic than remove(last_path.len() - 1)
+    let contents = unescape(&contents).unwrap_or(contents);
 
-    let mut extension = String::from("luau");
-    println!("{:#?}", last_path.join("\\").purple());
+    let mut new_path = format!(
+        "game\\{}.{}",
+        path.replace(".", "\\"),
+        match file_type.as_str() {
+            "server" => "server.lua",
+            "client" => "server.lua",
+            "json" => "json",
+            "toml" => "toml",
+            _ => "lua"
+        }
+    );
+    if new_path.ends_with("lua") && Path::new(format!("{new_path}u").as_str()).exists() {
+        new_path = format!("{new_path}u");
+    }
 
-    if let Ok(files) = get_files(&last_path.join("\\")) {
-        for (buf, _) in files {
-            if buf.file_name().unwrap().to_str().unwrap() == *collection.last().unwrap() {
-                if let Some(ext) = buf.extension() {
-                    extension = ext.to_str().unwrap().to_string();
-                }
-                break; // Exit the loop once we find a match
-            }
+    println!("{}", match file_type.as_str() {
+        "server" => "server.lua",
+        "client" => "server.lua",
+        "json" => "json",
+        "toml" => "toml",
+        _ => "lua"
+    });
+
+    if Path::new(new_path.as_str()).exists() {
+        if let Ok(mut new_file) = File::create(&new_path) {
+            println!("contents: {}", contents.red());
+            new_file.write_all(contents.as_bytes())
+                    .expect("Failed to write to file.")
+        } else {
+            println!("{}", format!("{} {}", "Failed to create file:".red(), path.purple()))
         }
     }
 
-    if file_type.len() > 1 {
-        *file_type = format!(".{file_type}");
-    }
+    let data = match GLOBAL_DATA.lock() {
+        Ok(guard) => guard,
+        Err(poisoned) => poisoned.into_inner(), // Recover from poisoned mutex
+    };
 
-    fs::write(
-        format!("{}\\{}{file_type}.{}", path, collection.last().unwrap(), extension),
-        contents
-    ).expect("Failed to write file path.")
+    alter_tree(&mut data.clone(), new_path, contents.clone());
+}
+
+fn alter_tree(x: &mut Vec<FileTree>, new_path: String, contents: String) {
+    for i in x {
+        match i {
+            FileTree::File(path, ref mut content) => {
+                if path.to_str().expect("Failed to unwrap path.") == new_path.as_str() {
+                    println!("{}", content.yellow());
+                    *content = contents.clone();
+                    println!("{}", content.purple());
+                    return
+                }
+            },
+            FileTree::Directory(_, ref mut tree) => {
+                alter_tree(tree, new_path.clone(), contents.clone());
+            }
+        }
+    }
 }

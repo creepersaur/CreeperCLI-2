@@ -27,19 +27,27 @@ pub async fn post(body: String) -> impl Responder {
         let cwd = get_cwd();
         if let Ok(settings) = get_settings(&cwd) {
             let json = json!(settings).to_string();
-            println!("{}", json.red());
 
             return HttpResponse::Ok().body(json);
         } else {
             println!("{}", "Failed to read settings!".red());
         }
     } else if data[0] == "__FILE__" {
-        println!("FILE WRITE REQUESTED: {}", data[1]);
-        filesystem::write_file(
-            &mut data[1].to_string(),
+        let data = [
+            data[1].to_string(),
             data[2].to_string(),
-            &mut data[3].to_string(),
+            data[3].to_string(),
+        ];
+
+        // println!("ARGH {}", format!("the filetype is: {}", data[2]).cyan());
+        // println!("FILE WRITE REQUESTED: {}", data[1].purple());
+
+        filesystem::write_file(
+            &mut data[0][1..data[0].len() - 1].to_string(),
+            data[1][1..data[1].len() - 1].to_string(),
+            &mut data[2][1..data[2].len() - 1].to_string(),
         );
+
         return HttpResponse::Ok().body(r#"{"File added": "SUCCESS"}"#);
     }
 

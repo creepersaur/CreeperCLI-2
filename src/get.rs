@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 lazy_static! {
-    static ref GLOBAL_DATA: Mutex<Vec<FileTree>> = Mutex::new(vec![]);
+    pub static ref GLOBAL_DATA: Mutex<Vec<FileTree>> = Mutex::new(vec![]);
 }
 
 pub async fn get() -> impl Responder {

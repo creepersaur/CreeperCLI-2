@@ -1,1 +1,1 @@
-print("Hello CreeperCLI from ServerStorage")
+print("Hello world")

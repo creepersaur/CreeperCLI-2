@@ -32,7 +32,7 @@ pub fn map_tree(tree: Vec<FileTree>) -> String {
     for i in tree {
         if let FileTree::File(path, content) = i {
             let (mut name, extension) = (
-                path.file_stem().expect("Failed to get file_name").to_str().unwrap().to_string(),
+                path.file_name().expect("Failed to get file_name").to_str().unwrap().to_string(),
                 path.extension().expect("Failed to get extension!")
             );
 

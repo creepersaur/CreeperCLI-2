@@ -1,6 +1,5 @@
 use colored::Colorize;
-use toml::Table;
-use std::{fs, io::stdin, path::Path};
+use std::{io::stdin, path::Path};
 
 use filesystem::get_cwd;
 use server::run_server;
@@ -9,6 +8,7 @@ mod filesystem;
 mod get;
 mod post;
 mod server;
+mod settings;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -17,13 +17,11 @@ async fn main() -> std::io::Result<()> {
 
     let mut port: u16 = 8080;
 
-    if let Ok(creeper_toml) = fs::read_to_string(format!("{}//creeper.toml", &cwd)) {
-        if let Ok(settings) = creeper_toml.parse::<Table>() {
-            for (name, value) in settings.iter() {
-                match name.to_lowercase().as_str() {
-                    "port" => port = value.as_integer().unwrap_or(8080) as u16,
-                    _ => {}
-                }
+    if let Ok(settings) = settings::get_settings(&cwd) {
+        for (name, value) in settings.iter() {
+            match name.to_lowercase().as_str() {
+                "port" => port = value.as_integer().unwrap_or(8080) as u16,
+                _ => {}
             }
         }
     }

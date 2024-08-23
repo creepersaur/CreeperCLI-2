@@ -71,3 +71,33 @@ pub fn get_cwd() -> String {
 
     cwd
 }
+
+pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
+    let split_first = path.split_off(1);
+    let collection: Vec<&str> = split_first.split(".").collect();
+    let mut last_path = collection.clone();
+    last_path.pop(); // More idiomatic than remove(last_path.len() - 1)
+
+    let mut extension = String::from("luau");
+    println!("{:#?}", last_path.join("\\").purple());
+
+    if let Ok(files) = get_files(&last_path.join("\\")) {
+        for (buf, _) in files {
+            if buf.file_name().unwrap().to_str().unwrap() == *collection.last().unwrap() {
+                if let Some(ext) = buf.extension() {
+                    extension = ext.to_str().unwrap().to_string();
+                }
+                break; // Exit the loop once we find a match
+            }
+        }
+    }
+
+    if file_type.len() > 1 {
+        *file_type = format!(".{file_type}");
+    }
+
+    fs::write(
+        format!("{}\\{}{file_type}.{}", path, collection.last().unwrap(), extension),
+        contents
+    ).expect("Failed to write file path.")
+}

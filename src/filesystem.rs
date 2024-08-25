@@ -79,9 +79,13 @@ pub fn get_cwd() -> String {
 pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
     let contents = unescape(&contents).unwrap_or(contents);
 
-    let mut new_path = format!(
-        "game\\{}.{}",
+    let new_parent_path = format!(
+        "game\\{}",
         path.replace(".", "\\"),
+    );
+    let mut new_file_path = format!(
+        "{}.{}",
+        new_parent_path,
         match file_type.as_str() {
             "server" => "server.lua",
             "client" => "server.lua",
@@ -90,26 +94,29 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
             _ => "lua"
         }
     );
-    if new_path.ends_with("lua") && Path::new(format!("{new_path}u").as_str()).exists() {
-        new_path = format!("{new_path}u");
+
+    let mut dir_path = new_parent_path.split("\\").collect::<Vec<&str>>();
+    dir_path.remove(dir_path.len() - 1);
+    
+    let dir_path = dir_path.join("\\");
+
+    if new_file_path.ends_with("lua") && Path::new(format!("{new_file_path}u").as_str()).exists() {
+        new_file_path = format!("{new_file_path}u");
     }
 
-    println!("{}", match file_type.as_str() {
-        "server" => "server.lua",
-        "client" => "server.lua",
-        "json" => "json",
-        "toml" => "toml",
-        _ => "lua"
-    });
-
-    if Path::new(new_path.as_str()).exists() {
-        if let Ok(mut new_file) = File::create(&new_path) {
-            println!("contents: {}", contents.red());
-            new_file.write_all(contents.as_bytes())
-                    .expect("Failed to write to file.")
-        } else {
-            println!("{}", format!("{} {}", "Failed to create file:".red(), path.purple()))
+    if !Path::new(&dir_path).exists() {
+        let mut builder = fs::DirBuilder::new();
+        builder.recursive(true);
+        if let Err(_) = fs::DirBuilder::new().create(&dir_path) {
+            println!("{}", format!("Failed to build directory `{}`.", dir_path).red())
         }
+    }
+
+    if let Ok(mut new_file) = File::create(&new_file_path) {
+        new_file.write_all(contents.as_bytes())
+                .expect("Failed to write to file.")
+    } else {
+        println!("{}", format!("{} {}", "Failed to create file:".red(), path.purple()))
     }
 
     let data = match GLOBAL_DATA.lock() {
@@ -117,7 +124,7 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
         Err(poisoned) => poisoned.into_inner(), // Recover from poisoned mutex
     };
 
-    alter_tree(&mut data.clone(), new_path, contents.clone());
+    alter_tree(&mut data.clone(), new_file_path, contents.clone());
 }
 
 fn alter_tree(x: &mut Vec<FileTree>, new_path: String, contents: String) {

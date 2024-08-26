@@ -10,7 +10,7 @@ lazy_static! {
 }
 
 pub async fn get() -> impl Responder {
-    let mut tree = filesystem::get_game_files();
+    let mut tree = filesystem::get_root_files("game");
 
     let mut data = match GLOBAL_DATA.lock() {
         Ok(guard) => guard,

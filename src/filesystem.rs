@@ -44,9 +44,9 @@ pub fn get_tree(root: &str) -> Vec<FileTree> {
     tree
 }
 
-pub fn get_game_files() -> Vec<FileTree> {
+pub fn get_root_files(root: &str) -> Vec<FileTree> {
     let cwd = get_cwd();
-    let game = format!("{cwd}\\game");
+    let game = format!("{cwd}\\{root}");
     get_tree(game.as_str())
 }
 

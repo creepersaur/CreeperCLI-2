@@ -1,14 +1,20 @@
 use colored::Colorize;
+use toml::Table;
 use std::{io::stdin, path::Path};
-
 use filesystem::get_cwd;
 use server::run_server;
+use lazy_static::lazy_static;
+use std::sync::Mutex;
 
 mod filesystem;
 mod get;
 mod post;
 mod server;
 mod settings;
+
+lazy_static! {
+    pub static ref DIRECTORIES: Mutex<Table> = Mutex::new(Table::new());
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -21,6 +27,13 @@ async fn main() -> std::io::Result<()> {
         for (name, value) in settings.iter() {
             match name.to_lowercase().as_str() {
                 "port" => port = value.as_integer().unwrap_or(8080) as u16,
+                "directories" => {
+                    let mut data = match DIRECTORIES.lock() {
+                        Ok(guard) => guard,
+                        Err(poisoned) => poisoned.into_inner(), // Recover from poisoned mutex
+                    };
+                    *data = value.as_table().unwrap_or(&Table::new()).clone();
+                },
                 _ => {}
             }
         }

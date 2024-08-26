@@ -22,7 +22,7 @@ pub async fn post(body: String) -> impl Responder {
 
         return HttpResponse::Ok()
             .append_header((header::CONTENT_TYPE, "application/json"))
-            .body(map_tree(filesystem::get_game_files()));
+            .body(map_tree(filesystem::get_root_files("game")));
     } else if data[0] == "__SETTINGS__" {
         let cwd = get_cwd();
         if let Ok(settings) = get_settings(&cwd) {

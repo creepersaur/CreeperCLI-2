@@ -1,5 +1,6 @@
 port = 8080
 two_way_sync = [
     "ServerStorage",
-    "ReplicatedStorage"
+    "ReplicatedStorage/SearchThis"
 ]
+two_way_descendants = false

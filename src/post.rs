@@ -30,7 +30,7 @@ pub async fn post(body: String) -> impl Responder {
 
             return HttpResponse::Ok().body(json);
         } else {
-            println!("{}", "Failed to read settings!".red());
+            println!("{}", "Failed to read settings! [Add a `creeper.toml` file into the main folder to silence.]".yellow());
         }
     } else if data[0] == "__FILE__" {
         let data = [

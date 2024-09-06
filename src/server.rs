@@ -9,7 +9,7 @@ pub async fn run_server(port: u16) -> std::io::Result<()> {
             .route("/", web::get().to(get))
             .route("/", web::post().to(post))
     })
-    .bind(format!("localhost:{}", port))?
+    .bind(format!("localhost:{port}"))?
     .run()
     .await
 }

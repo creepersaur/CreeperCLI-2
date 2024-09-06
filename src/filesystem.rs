@@ -8,7 +8,10 @@ use toml::Table;
 use fs::File;
 use unescape::unescape;
 
-use crate::get::GLOBAL_DATA;
+use crate::{
+    get::GLOBAL_DATA,
+    ROOT
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileTree {
@@ -78,9 +81,10 @@ pub fn get_cwd() -> String {
 
 pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
     let contents = unescape(&contents).unwrap_or(contents);
+    let root = ROOT.lock().expect("Failed to get ROOT (filesystem)");
 
     let new_parent_path = format!(
-        "game\\{}",
+        "{root}\\{}",
         path.replace(".", "\\"),
     );
     let mut new_file_path = format!(
@@ -94,6 +98,8 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
             _ => "lua"
         }
     );
+
+    drop(root);
 
     let mut dir_path = new_parent_path.split("\\").collect::<Vec<&str>>();
     dir_path.remove(dir_path.len() - 1);
@@ -125,6 +131,7 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
     };
 
     alter_tree(&mut data.clone(), new_file_path, contents.clone());
+    drop(data);
 }
 
 fn alter_tree(x: &mut Vec<FileTree>, new_path: String, contents: String) {

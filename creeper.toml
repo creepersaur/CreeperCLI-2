@@ -1,6 +1,6 @@
 port = 8080
 two_way_sync = [
     "ServerStorage",
-    "ServerScriptService/SearchThis"
+    "ServerScriptService"
 ]
 two_way_descendants = false

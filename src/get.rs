@@ -1,9 +1,13 @@
-use crate::filesystem::{self, FileTree};
 use actix_web::{http::header, HttpResponse, Responder};
 use lazy_static::lazy_static;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::sync::Mutex;
+
+use crate::{
+    filesystem::{self, FileTree},
+    ROOT
+};
 
 lazy_static! {
     pub static ref GLOBAL_DATA: Mutex<Vec<FileTree>> = Mutex::new(vec![]);
@@ -42,8 +46,11 @@ pub fn map_tree(tree: Vec<FileTree>) -> String {
             file_structure.insert(name, content);
         } else if let FileTree::Directory(path, files) = i {
             let new_path = path.to_string_lossy();
-            let game_index = new_path.find("game").unwrap();
+            let root = ROOT.lock().expect("Failed to get ROOT.");
+            let game_index = new_path.find(root.as_str()).unwrap();
             let (_, end) = new_path.split_at(game_index);
+            
+            drop(root);
 
             file_structure.insert(end.to_string(), map_tree(files));
         }

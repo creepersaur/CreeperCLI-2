@@ -26,7 +26,6 @@ async fn main() -> std::io::Result<()> {
         for (name, value) in settings.iter() {
             match name.to_lowercase().as_str() {
                 "port" => port = value.as_integer().unwrap_or(8080) as u16,
-                // "root" => root = value.as_str().unwrap_or("game").to_string(),
                 "root" => {
                     let mut data = match ROOT.lock() {
                         Ok(guard) => guard,
@@ -40,7 +39,10 @@ async fn main() -> std::io::Result<()> {
         }
     }
     
-    let root = ROOT.lock().expect("Failed to get ROOT.");
+    let root = match ROOT.lock() {
+        Ok(guard) => guard,
+        Err(poisoned) => poisoned.into_inner()
+    };
     let game_dir = format!("{}//{}", &cwd, *root);
 
     let path = Path::new(game_dir.as_str());

@@ -81,12 +81,17 @@ pub fn get_cwd() -> String {
 
 pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
     let contents = unescape(&contents).unwrap_or(contents);
-    let root = ROOT.lock().expect("Failed to get ROOT (filesystem)");
+    let root = match ROOT.lock() {
+        Ok(guard) => guard,
+        Err(poisoned) => poisoned.into_inner()
+    };
 
     let new_parent_path = format!(
         "{root}\\{}",
         path.replace(".", "\\"),
     );
+    drop(root);
+
     let mut new_file_path = format!(
         "{}.{}",
         new_parent_path,
@@ -98,8 +103,6 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
             _ => "lua"
         }
     );
-
-    drop(root);
 
     let mut dir_path = new_parent_path.split("\\").collect::<Vec<&str>>();
     dir_path.remove(dir_path.len() - 1);
@@ -130,7 +133,7 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
         Err(poisoned) => poisoned.into_inner(), // Recover from poisoned mutex
     };
 
-    alter_tree(&mut data.clone(), new_file_path, contents.clone());
+    alter_tree(&mut (*data).clone(), new_file_path, contents.clone());
     drop(data);
 }
 

@@ -23,7 +23,10 @@ pub async fn post(body: String) -> impl Responder {
         );
 
 
-        let root = ROOT.lock().expect("Failed to get ROOT (post)");
+        let root = match ROOT.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner()
+        };
         let files = filesystem::get_root_files(root.as_str());
         drop(root);
 

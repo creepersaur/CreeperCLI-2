@@ -14,7 +14,13 @@ lazy_static! {
 }
 
 pub async fn get() -> impl Responder {
-    let mut tree = filesystem::get_root_files("game");
+    let root = match ROOT.lock() {
+        Ok(guard) => guard,
+        Err(poisoned) => poisoned.into_inner()
+    };
+    let mut tree = filesystem::get_root_files(&root);
+    
+    drop(root);
 
     let mut data = match GLOBAL_DATA.lock() {
         Ok(guard) => guard,
@@ -23,6 +29,8 @@ pub async fn get() -> impl Responder {
     let mut old_tree = data.clone();
 
     *data = tree.clone();
+    // drop(data);
+
     tree = trim_tree(&mut tree, &mut old_tree);
 
     HttpResponse::Ok()
@@ -46,7 +54,10 @@ pub fn map_tree(tree: Vec<FileTree>) -> String {
             file_structure.insert(name, content);
         } else if let FileTree::Directory(path, files) = i {
             let new_path = path.to_string_lossy();
-            let root = ROOT.lock().expect("Failed to get ROOT.");
+            let root = match ROOT.lock() {
+                Ok(guard) => guard,
+                Err(poisoned) => poisoned.into_inner()
+            };
             let game_index = new_path.find(root.as_str()).unwrap();
             let (_, end) = new_path.split_at(game_index);
             

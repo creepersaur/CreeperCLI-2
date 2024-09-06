@@ -75,4 +75,5 @@ It would get translated to this in studio:
 - Run `cargo build` to compile it. (use `cargo run` to run the `.exe` immediately).
 - The `.exe` file should be the `target/debug/creeper_cli.exe` file.
 
-Have fun creating, and also report any issues on the [Issues](https://github.com/creepersaur/CreeperCLI-2/issues) tab or through the devforum post.
+Have fun creating, and also report any issues on the devforum post.
+(I probably won't read the [Issues](https://github.com/creepersaur/CreeperCLI-2/issues) tab.)

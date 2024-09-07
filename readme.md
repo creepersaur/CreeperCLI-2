@@ -71,9 +71,10 @@ It would get translated to this in studio:
 ## Compiling CreeperCLI
 - Install rust + cargo (through rustup).
 - Install Rust Visual Studio Prerequisites (rustup should've done that already).
-- Download the source code and check if cargo is working (use `cargo init`).
-- Run `cargo build` to compile it. (use `cargo run` to run the `.exe` immediately).
-- The `.exe` file should be the `target/debug/creeper_cli.exe` file.
+- Download the source code and check if cargo is working (use `cargo`).
+- Clone the git repository and `cd` into it.
+- Run `cargo build --release` to compile it. (use `cargo run --release` to run the `.exe` immediately).
+- The `.exe` file should be the `target/debug/creeper_cli.exe` file. (Binary may be different due to OS).
 
 Have fun creating, and also report any issues on the devforum post.
-(I probably won't read the [Issues](https://github.com/creepersaur/CreeperCLI-2/issues) tab.)
+(I probably won't read the [Issues](https://github.com/creepersaur/CreeperCLI-2/issues) tab, but you're free to do anyway.)

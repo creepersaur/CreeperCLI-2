@@ -39,7 +39,7 @@ pub async fn get() -> impl Responder {
 }
 
 pub fn map_tree(tree: Vec<FileTree>) -> String {
-    let mut file_structure = HashMap::new();
+    let mut file_structure: HashMap<String, String> = HashMap::new();
 
     for i in tree {
         if let FileTree::File(path, content) = i {
@@ -89,6 +89,9 @@ fn trim_tree(tree: &mut Vec<FileTree>, old_tree: &mut Vec<FileTree>) -> Vec<File
                     }
                 }
                 FileTree::Directory(path, mut f1) => {
+                    if x >= old_tree.len() {
+                        continue
+                    }
                     if let FileTree::Directory(_, mut f2) = old_tree[x].clone() {
                         let trimmed = trim_tree(&mut f1, &mut f2);
                         if trimmed.len() < 1 {

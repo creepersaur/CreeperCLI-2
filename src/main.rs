@@ -5,6 +5,7 @@ use filesystem::get_cwd;
 use server::run_server;
 use std::mem::drop;
 
+mod sourcemap;
 mod filesystem;
 mod get;
 mod post;

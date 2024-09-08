@@ -86,9 +86,14 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
         Err(poisoned) => poisoned.into_inner()
     };
 
+    let path_build = path.split(".");
+    let mut path = path_build.collect::<String>();
+    path.remove(1);
+    path = path.replace(".", "\\");
+
     let new_parent_path = format!(
         "{root}\\{}",
-        path.replace(".", "\\"),
+        path,
     );
     drop(root);
 

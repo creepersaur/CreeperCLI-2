@@ -1,0 +1,117 @@
+{
+    "name": "Console",
+    "className": "DataModel",
+    "filePaths": [
+        "default.project.json"
+    ],
+    "children": [
+        {
+            "name": "Lighting",
+            "className": "Lighting"
+        },
+        {
+            "name": "ReplicatedStorage",
+            "className": "ReplicatedStorage",
+            "children": [
+                {
+                    "name": "Shared",
+                    "className": "Folder",
+                    "filePaths": [
+                        "src/shared\\init.meta.json"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "ServerScriptService",
+            "className": "ServerScriptService",
+            "children": [
+                {
+                    "name": "Server",
+                    "className": "Folder",
+                    "filePaths": [
+                        "src/server\\init.meta.json"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "SoundService",
+            "className": "SoundService"
+        },
+        {
+            "name": "StarterGui",
+            "className": "StarterGui",
+            "children": [
+                {
+                    "name": "UI",
+                    "className": "Folder",
+                    "filePaths": [
+                        "src/ui\\init.meta.json"
+                    ],
+                    "children": [
+                        {
+                            "name": "console",
+                            "className": "LocalScript",
+                            "filePaths": [
+                                "src/ui\\console\\init.client.luau"
+                            ],
+                            "children": [
+                                {
+                                    "name": "console",
+                                    "className": "ModuleScript",
+                                    "filePaths": [
+                                        "src/ui\\console\\console.luau"
+                                    ]
+                                },
+                                {
+                                    "name": "hello",
+                                    "className": "ModuleScript",
+                                    "filePaths": [
+                                        "src/ui\\console\\hello.luau"
+                                    ]
+                                },
+                                {
+                                    "name": "types",
+                                    "className": "ModuleScript",
+                                    "filePaths": [
+                                        "src/ui\\console\\types.luau"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "StarterPlayer",
+            "className": "StarterPlayer",
+            "children": [
+                {
+                    "name": "StarterPlayerScripts",
+                    "className": "StarterPlayerScripts",
+                    "children": [
+                        {
+                            "name": "Client",
+                            "className": "Folder",
+                            "filePaths": [
+                                "src/client\\init.meta.json"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Workspace",
+            "className": "Workspace",
+            "children": [
+                {
+                    "name": "Baseplate",
+                    "className": "Part"
+                }
+            ]
+        }
+    ]
+}

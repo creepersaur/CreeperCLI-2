@@ -79,7 +79,7 @@ pub fn get_cwd() -> String {
     cwd
 }
 
-pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
+pub fn write_file(mut path: String, contents: String, file_type: String) {
     let contents = unescape(&contents).unwrap_or(contents);
     let root = match ROOT.lock() {
         Ok(guard) => guard,
@@ -87,9 +87,9 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
     };
 
     let path_build = path.split(".");
-    let mut path = path_build.collect::<String>();
-    path.remove(1);
-    path = path.replace(".", "\\");
+    let path_vec = path_build.collect::<Vec<&str>>();
+
+    path = path_vec.join("\\");
 
     let new_parent_path = format!(
         "{root}\\{}",
@@ -113,12 +113,8 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
     dir_path.remove(dir_path.len() - 1);
     
     let dir_path = dir_path.join("\\");
-
-    if new_file_path.ends_with("lua") && Path::new(format!("{new_file_path}u").as_str()).exists() {
-        new_file_path = format!("{new_file_path}u");
-    }
-
     if !Path::new(&dir_path).exists() {
+        println!("Building directory: {}", dir_path);
         let mut builder = fs::DirBuilder::new();
         builder.recursive(true);
         if let Err(_) = fs::DirBuilder::new().create(&dir_path) {
@@ -126,11 +122,15 @@ pub fn write_file(path: &mut String, contents: String, file_type: &mut String) {
         }
     }
 
+    if new_file_path.ends_with("lua") && Path::new(format!("{new_file_path}u").as_str()).exists() {
+        new_file_path = format!("{new_file_path}u");
+    }
+
     if let Ok(mut new_file) = File::create(&new_file_path) {
         new_file.write_all(contents.as_bytes())
                 .expect("Failed to write to file.")
     } else {
-        println!("{}", format!("{} {}", "Failed to create file:".red(), path.purple()))
+        println!("{}", format!("{} {}", "Failed to create file:".red(), new_file_path.purple()))
     }
 
     let data = match GLOBAL_DATA.lock() {
@@ -157,5 +157,16 @@ fn alter_tree(x: &mut Vec<FileTree>, new_path: String, contents: String) {
                 alter_tree(tree, new_path.clone(), contents.clone());
             }
         }
+    }
+}
+
+pub fn write_sourcemap(data: String) {
+    let data = format!("{}{data}{}", "{", "}");
+
+    if let Ok(mut new_file) = File::create("sourcemap.json") {
+        new_file.write_all(data.as_bytes())
+                .expect("Failed to write to file.")
+    } else {
+        println!("{}", format!("{} {}", "Failed to create file:".red(), "sourcemap.json".purple()))
     }
 }

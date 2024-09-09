@@ -79,17 +79,17 @@ pub fn get_cwd() -> String {
     cwd
 }
 
-pub fn write_file(mut path: String, contents: String, file_type: String) {
+pub fn write_file(path: String, contents: String, file_type: String) {
     let contents = unescape(&contents).unwrap_or(contents);
     let root = match ROOT.lock() {
         Ok(guard) => guard,
         Err(poisoned) => poisoned.into_inner()
     };
 
-    let path_build = path.split(".");
-    let path_vec = path_build.collect::<Vec<&str>>();
+    // let path_build = path.split(".");
+    // let path_vec = path_build.collect::<Vec<&str>>();
 
-    path = path_vec.join("\\");
+    // path = path_vec.join("\\");
 
     let new_parent_path = format!(
         "{root}\\{}",

@@ -1,6 +1,6 @@
 {
-    "name": "Place1",
-    "tree": {
-        "$className": "DataModel"
+        "name": "Place3",
+        "tree": {
+            "$className": "DataModel"
+        }
     }
-}

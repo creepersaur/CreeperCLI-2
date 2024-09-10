@@ -126,6 +126,10 @@ pub fn write_file(path: String, contents: String, file_type: String) {
         new_file_path = format!("{new_file_path}u");
     }
 
+    if !Path::new(&new_file_path).exists() && new_file_path.ends_with("lua") {
+        new_file_path = format!("{new_file_path}u")
+    }
+
     if let Ok(mut new_file) = File::create(&new_file_path) {
         new_file.write_all(contents.as_bytes())
                 .expect("Failed to write to file.")
@@ -160,13 +164,27 @@ fn alter_tree(x: &mut Vec<FileTree>, new_path: String, contents: String) {
     }
 }
 
-pub fn write_sourcemap(data: String) {
-    let data = format!("{}{data}{}", "{", "}");
+pub fn write_sourcemap(data: String, game_name: String) {
+    let sourcemap = format!("{}{data}{}", "{", "}");
 
     if let Ok(mut new_file) = File::create("sourcemap.json") {
-        new_file.write_all(data.as_bytes())
+        new_file.write_all(sourcemap.as_bytes())
                 .expect("Failed to write to file.")
     } else {
         println!("{}", format!("{} {}", "Failed to create file:".red(), "sourcemap.json".purple()))
+    }
+
+    let project = format!(r#"{{
+        "name": "{game_name}",
+        "tree": {{
+            "$className": "DataModel"
+        }}
+    }}"#);
+
+    if let Ok(mut new_file) = File::create("default.project.json") {
+        new_file.write_all(project.as_bytes())
+                .expect("Failed to write to file.")
+    } else {
+        println!("{}", format!("{} {}", "Failed to create file:".red(), "default.project.json".purple()))
     }
 }

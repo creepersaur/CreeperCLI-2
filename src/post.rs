@@ -60,9 +60,13 @@ pub async fn post(body: String) -> impl Responder {
             return HttpResponse::Ok().body(r#"{"File added": "SUCCESS"}"#);
         },
         "__SOURCEMAP__" => {
-            let data = data[1].to_string();
+            let data = [
+                data[1].to_string(),
+                data[2].to_string()
+            ];
             filesystem::write_sourcemap(
-                data[1..data.len() - 1].to_string()
+                data[0][1..data[0].len() - 1].to_string(),
+                data[1][1..data[1].len() - 1].to_string()
             )
         }
         _ => {}

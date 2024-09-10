@@ -1,6 +1,6 @@
 use colored::Colorize;
 use lazy_static::lazy_static;
-use std::{io::stdin, path::Path, sync::Mutex};
+use std::{env, io::stdin, path::Path, sync::Mutex};
 use filesystem::get_cwd;
 use server::run_server;
 use std::mem::drop;
@@ -11,6 +11,7 @@ mod get;
 mod post;
 mod server;
 mod settings;
+mod update;
 
 lazy_static! {
     // pub static ref DIRECTORIES: Mutex<Table> = Mutex::new(Table::new());
@@ -20,6 +21,12 @@ lazy_static! {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let cwd = get_cwd();
+
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 1 && args[1] == "update" {
+        update::update_cli();
+        return Ok(())
+    }
 
     let mut port: u16 = 8080;
 

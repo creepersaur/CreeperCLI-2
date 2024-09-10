@@ -3,3 +3,5 @@
 /build
 .gitignore
 selene.toml
+default.project.json
+sourcemap.json

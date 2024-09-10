@@ -24,7 +24,7 @@ async fn main() -> std::io::Result<()> {
 
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 && args[1] == "update" {
-        update::update_cli();
+        update::update_cli().expect("Failed to update CreeperCLI.");
         return Ok(())
     }
 

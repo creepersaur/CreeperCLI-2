@@ -27,13 +27,23 @@ two_way_descendants = true
 "#,)
     );
 
-    fs::build_dir("game/ServerScriptService/server");
-    fs::build_dir("game/StarterPlayerScripts/client");
-    fs::build_dir("game/ReplicatedStorage/shared");
+    fs::build_dir(format!("{root}/ServerScriptService/server"));
+    fs::build_dir(format!("{root}/StarterPlayerScripts/client"));
+    fs::build_dir(format!("{root}/ReplicatedStorage/shared"));
 
     fs::create_file(
-        &"game/ServerScriptService/server/hello.server.luau",
+        &format!("{root}/ServerScriptService/server/hello.server.luau"),
         &r#"print("Hello from CreeperCLI! (server)")"#
+    );
+
+    fs::create_file(
+        &"sourcemap.json",
+        &r#"["Will be replaced when the plugin connects.]"#
+    );
+
+    fs::create_file(
+        &"default.project.json",
+        &r#"["Will be replaced when the plugin connects.]"#
     );
     
     println!("{} 👍", "Successfully initialized CreeperCLI project!".green());

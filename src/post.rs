@@ -4,7 +4,7 @@ use serde_json::{json, Value};
 use std::mem::drop;
 
 use crate::{
-    filesystem::{self, get_cwd},
+    filesystem,
     get::map_tree,
     settings::get_settings,
     ROOT,
@@ -29,14 +29,18 @@ pub async fn post(body: String) -> impl Responder {
             };
             let files = filesystem::get_root_files(root.as_str());
             drop(root);
+
+            let game_name = data[2].to_string();
+            filesystem::write_project(
+                game_name[1..game_name.len() - 1].to_string()
+            );
     
             return HttpResponse::Ok()
                 .append_header((header::CONTENT_TYPE, "application/json"))
                 .body(map_tree(files));
         },
         "__SETTINGS__" => {
-            let cwd = get_cwd();
-            if let Ok(settings) = get_settings(&cwd) {
+            if let Ok(settings) = get_settings() {
                 let json = json!(settings).to_string();
 
                 return HttpResponse::Ok().body(json);
@@ -60,13 +64,9 @@ pub async fn post(body: String) -> impl Responder {
             return HttpResponse::Ok().body(r#"{"File added": "SUCCESS"}"#);
         },
         "__SOURCEMAP__" => {
-            let data = [
-                data[1].to_string(),
-                data[2].to_string()
-            ];
+            let data = data[1].to_string();
             filesystem::write_sourcemap(
-                data[0][1..data[0].len() - 1].to_string(),
-                data[1][1..data[1].len() - 1].to_string()
+                data[1..data.len() - 1].to_string(),
             )
         }
         _ => {}

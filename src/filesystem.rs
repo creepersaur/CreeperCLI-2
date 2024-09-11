@@ -2,12 +2,14 @@ use colored::Colorize;
 use fs::File;
 use serde_json::json;
 use std::env;
+use std::ffi::OsStr;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use toml::Table;
 use unescape::unescape;
 
+use crate::CWD;
 use crate::{get::GLOBAL_DATA, ROOT};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -52,9 +54,7 @@ pub fn get_tree(root: &str) -> Vec<FileTree> {
 }
 
 pub fn get_root_files(root: &str) -> Vec<FileTree> {
-    let cwd = get_cwd();
-    let cwd_path = PathBuf::from(cwd);
-    let game = cwd_path.join(root);
+    let game = CWD.join(root);
     get_tree(game.to_str().expect("Failed to get root."))
 }
 
@@ -76,14 +76,8 @@ pub fn get_files(path: &str) -> Result<Vec<(PathBuf, bool)>, ()> {
     Ok(children)
 }
 
-pub fn get_cwd() -> String {
-    let cwd = env::current_dir()
-        .expect("Failed to get current working directory.")
-        .to_str()
-        .expect("Failed to convert cwd to str.")
-        .to_owned();
-
-    cwd
+pub fn get_cwd() -> PathBuf {
+    env::current_dir().expect("Failed to get current working directory.")
 }
 
 pub fn write_file(path: String, contents: String, file_type: String) {
@@ -139,20 +133,7 @@ pub fn write_file(path: String, contents: String, file_type: String) {
         ));
     }
 
-    if let Ok(mut new_file) = File::create(&new_file_path) {
-        new_file
-            .write_all(contents.as_bytes())
-            .expect("Failed to write to file.")
-    } else {
-        println!(
-            "{}",
-            format!(
-                "{} {}",
-                "Failed to create file:".red(),
-                new_file_path.to_str().unwrap().purple()
-            )
-        )
-    }
+    create_file(&new_file_path, &contents);
 
     let data = match GLOBAL_DATA.lock() {
         Ok(guard) => guard,
@@ -185,45 +166,89 @@ fn alter_tree(x: &mut Vec<FileTree>, new_path: String, contents: String) {
     }
 }
 
-pub fn write_sourcemap(data: String, game_name: String) {
+pub fn write_sourcemap(data: String) {
     let sourcemap = format!("{}{data}{}", "{", "}");
 
-    if let Ok(mut new_file) = File::create("sourcemap.json") {
-        new_file
-            .write_all(sourcemap.as_bytes())
-            .expect("Failed to write to file.")
-    } else {
-        println!(
-            "{}",
-            format!(
-                "{} {}",
-                "Failed to create file:".red(),
-                "sourcemap.json".purple()
-            )
-        )
-    }
+    create_file(
+        &"sourcemap.json",
+        &sourcemap
+    );
+}
 
+pub fn write_project(game_name: String) {
     let project = format!(
         r#"{{
-        "name": "{game_name}",
-        "tree": {{
-            "$className": "DataModel"
-        }}
-    }}"#
+    "name": "{game_name}",
+    "tree": {{
+        "$className": "DataModel"
+    }}
+}}"#
     );
 
-    if let Ok(mut new_file) = File::create("default.project.json") {
-        new_file
-            .write_all(project.as_bytes())
-            .expect("Failed to write to file.")
-    } else {
+    create_file(
+        &"default.project.json",
+        &project
+    )
+}
+
+pub trait StrPath: AsRef<OsStr> {
+    fn get_path(&self) -> PathBuf {
+        PathBuf::from(&self)
+    }
+
+    fn get_bytes(&self) -> &[u8] {
+        return &[];
+    }
+}
+
+impl StrPath for String {
+    fn get_bytes(&self) -> &[u8] {
+        &self.as_bytes()
+    }
+}
+
+impl StrPath for &str {
+    fn get_bytes(&self) -> &[u8] {
+        &self.as_bytes()
+    }
+}
+
+impl StrPath for PathBuf {}
+
+pub fn create_file(path: &impl StrPath, content: &impl StrPath) {
+    let file_path = path.get_path();
+    let file_name = file_path
+        .file_name()
+        .expect("Failed to get file_name: create_file().")
+        .to_str()
+        .unwrap();
+
+    if let Err(out) = File::create(&file_path)
+        .expect(format!("Failed to create `{}`.", file_name).as_str())
+        .write_all(content.get_bytes())
+    {
         println!(
-            "{}",
-            format!(
-                "{} {}",
-                "Failed to create file:".red(),
-                "default.project.json".purple()
-            )
-        )
+            "{} Failed to write to: {}.",
+            "[ERROR]".red(),
+            format!("`{}`", file_name).purple()
+        );
+
+        println!("{}", out.to_string().dimmed());
+    }
+}
+
+pub fn build_dir(path: impl StrPath) {
+    let build_path = path.get_path();
+    let mut builder = fs::DirBuilder::new();
+    builder.recursive(true);
+
+    if let Err(out) = builder.create(&build_path) {
+        println!(
+            "{} Failed to build directory: {}.",
+            "[ERROR]".red(),
+            format!("`{}`", build_path.display()).purple()
+        );
+
+        println!("{}", out.to_string().dimmed());
     }
 }

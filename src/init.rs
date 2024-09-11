@@ -38,12 +38,12 @@ two_way_descendants = true
 
     fs::create_file(
         &"sourcemap.json",
-        &r#"["Will be replaced when the plugin connects.]"#
+        &r#"["Will be replaced when the plugin connects."]"#
     );
 
     fs::create_file(
         &"default.project.json",
-        &r#"["Will be replaced when the plugin connects.]"#
+        &r#"["Will be replaced when the plugin connects."]"#
     );
     
     println!("{} 👍", "Successfully initialized CreeperCLI project!".green());

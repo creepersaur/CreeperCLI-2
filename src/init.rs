@@ -1,3 +1,5 @@
+use colored::Colorize;
+
 use super::filesystem as fs;
 
 pub fn initialize() {
@@ -26,4 +28,6 @@ two_way_descendants = true
         &"game\\ServerScriptService\\server\\hello.server.luau",
         &r#"print("Hello from CreeperCLI! (server)")"#
     );
+    
+    println!("{} 👍", "Successfully initialized CreeperCLI project!".green());
 }

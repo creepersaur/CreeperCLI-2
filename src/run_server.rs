@@ -43,7 +43,7 @@ pub async fn start() {
             format!("`{}`",root).purple(),
             "DIRECTORY IN THE WORKING DIRECTORY.".red()
         );
-        println!("{}", "Try calling the `init` command to setup CreeperCLI.");
+        println!("{}", "Try calling the `init` command to setup CreeperCLI.".yellow());
 
         stdin()
             .read_line(&mut String::new())

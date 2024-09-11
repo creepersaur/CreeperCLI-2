@@ -242,7 +242,7 @@ pub fn build_dir(path: impl StrPath) {
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
 
-    if let Err(out) = fs::DirBuilder::new().create(&build_path) {
+    if let Err(out) = builder.create(&build_path) {
         println!(
             "{} Failed to build directory: {}.",
             "[ERROR]".red(),

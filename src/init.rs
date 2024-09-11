@@ -18,12 +18,12 @@ two_way_descendants = true
 "#,
     );
 
-    fs::build_dir("game/ServerScriptService/server");
-    fs::build_dir("game/StarterPlayerScripts/client");
-    fs::build_dir("game/ReplicatedStorage/shared");
+    fs::build_dir("game\\ServerScriptService\\server");
+    fs::build_dir("game\\StarterPlayerScripts\\client");
+    fs::build_dir("game\\ReplicatedStorage\\shared");
 
     fs::create_file(
-        &"game/ServerScriptService/server/hello.server.luau",
+        &"game\\ServerScriptService\\server\\hello.server.luau",
         &r#"print("Hello from CreeperCLI! (server)")"#
     );
 }

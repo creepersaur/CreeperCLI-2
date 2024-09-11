@@ -44,6 +44,7 @@ pub async fn start() {
             "DIRECTORY IN THE WORKING DIRECTORY.".red()
         );
         println!("{}", "Try calling the `init` command to setup CreeperCLI.".yellow());
+        println!("{}", "Press [Enter] to close.".dimmed());
 
         stdin()
             .read_line(&mut String::new())

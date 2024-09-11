@@ -2,7 +2,6 @@ use lazy_static::lazy_static;
 use colored::Colorize;
 use std::{env, path::PathBuf, sync::Mutex};
 
-mod sourcemap;
 mod filesystem;
 mod get;
 mod post;

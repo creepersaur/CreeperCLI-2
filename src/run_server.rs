@@ -49,6 +49,8 @@ pub async fn start() {
         stdin()
             .read_line(&mut String::new())
             .expect("Failed to read line.");
+        
+        return
     }
     
     drop(root);

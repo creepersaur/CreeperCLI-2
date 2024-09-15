@@ -117,7 +117,9 @@ pub fn write_file(path: String, contents: String, file_type: String) {
         }
     }
 
-    if new_file_path.ends_with("lua")
+    let extension = new_file_path.extension().unwrap().to_str().unwrap().to_string();
+
+    if extension == "lua"
         && Path::new(format!("{}u", new_file_path.display()).as_str()).exists()
     {
         new_file_path.set_extension(format!(
@@ -126,7 +128,7 @@ pub fn write_file(path: String, contents: String, file_type: String) {
         ));
     }
 
-    if !Path::new(&new_file_path).exists() && new_file_path.ends_with("lua") {
+    if !Path::new(&new_file_path).exists() && extension == "lua" {
         new_file_path.set_extension(format!(
             "{}u",
             new_file_path.extension().unwrap().to_str().unwrap()

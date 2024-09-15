@@ -1,1 +1,1 @@
-print("Hello from CreeperCLI (server)")
+print("Hello world!")

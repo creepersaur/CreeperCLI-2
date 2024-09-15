@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-use super::filesystem as fs;
+use crate::filesystem as fs;
 
 pub fn initialize(args: Vec<String>) {
     let mut root = "game";

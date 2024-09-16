@@ -89,10 +89,11 @@ pub fn write_file(path: String, contents: String, file_type: String) {
         Ok(guard) => guard,
         Err(poisoned) => poisoned.into_inner(),
     };
+    let root_path = (*root).clone();
+    drop(root);
 
-    let mut new_parent_path = PathBuf::from((*root).clone());
-    new_parent_path.push(format!(
-        "{path}.{}",
+    let new_parent_path = format!(
+        "{root_path}/{path}.{}",
         match file_type.as_str() {
             "server" => "server.lua",
             "client" => "server.lua",
@@ -100,24 +101,15 @@ pub fn write_file(path: String, contents: String, file_type: String) {
             "toml" => "toml",
             _ => "lua",
         }
-    ));
-
-    drop(root);
+    ).get_path();
 
     let mut new_file_path = new_parent_path.clone();
     let mut dir_path = new_parent_path;
     dir_path.pop();
 
     if !Path::new(&dir_path).exists() {
-        println!("Building directory: {}", dir_path.display());
-        let mut builder = fs::DirBuilder::new();
-        builder.recursive(true);
-        if let Err(_) = fs::DirBuilder::new().create(&dir_path) {
-            println!(
-                "{}",
-                format!("Failed to build directory `{}`.", dir_path.display()).red()
-            )
-        }
+        println!("{} {} Building directory: `{}`.", "[DIR_BUILDER]".blue(), "|".dimmed(), dir_path.display().to_string().purple());
+        build_dir(dir_path);
     }
 
     let extension = new_file_path.extension().unwrap().to_str().unwrap().to_string();

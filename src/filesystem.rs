@@ -30,7 +30,10 @@ pub fn get_tree(root: &str) -> Vec<FileTree> {
         } else {
             let path = i.0;
             let mut content = fs::read_to_string(&path).expect("Failed to get file content.");
-            let extension = path.extension().expect("Failed to get path extension!");
+            let extension = match path.extension() {
+                Some(ext) => ext,
+                _ => continue
+            };
 
             if extension == "toml" {
                 let parsed = content.parse::<Table>();

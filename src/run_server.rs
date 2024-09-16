@@ -1,12 +1,8 @@
+use super::{server::run_server, settings, CWD, ROOT};
 use colored::Colorize;
-use std::{io::stdin, path::Path};
-use super::{
-    server::run_server,
-    CWD,
-    settings,
-    ROOT
-};
+use std::io::{stdout, Write};
 use std::mem::drop;
+use std::{io::stdin, path::Path};
 
 pub async fn start() {
     let mut port: u16 = 8080;
@@ -18,42 +14,47 @@ pub async fn start() {
                 "root" => {
                     let mut data = match ROOT.lock() {
                         Ok(guard) => guard,
-                        Err(poisoned) => poisoned.into_inner(), // Recover from poisoned mutex
+                        Err(poisoned) => poisoned.into_inner(),
                     };
                     *data = value.as_str().unwrap_or("game").to_string();
                     drop(data);
-                },
+                }
                 _ => {}
             }
         }
     }
-    
+
     let root = match ROOT.lock() {
         Ok(guard) => guard,
-        Err(poisoned) => poisoned.into_inner()
+        Err(poisoned) => poisoned.into_inner(),
     };
-    let mut game_dir = CWD.clone();
-    game_dir.push((*root).clone());
 
+    let root_name = (*root).clone();
+    drop(root);
+
+    let game_dir = CWD.join(&root_name);
     let path = Path::new(&game_dir);
+
     if !(path.exists() && path.is_dir()) {
         println!(
             "{} {} {}",
             "YOU MUST HAVE A".red(),
-            format!("`{}`",root).purple(),
+            format!("`{}`", root_name).purple(),
             "DIRECTORY IN THE WORKING DIRECTORY.".red()
         );
-        println!("{}", "Try calling the `init` command to setup CreeperCLI.".yellow());
-        println!("{}", "Press [Enter] to close.".dimmed());
+        print!(
+            "{}\n{}",
+            "Try calling the `init` command to setup CreeperCLI.".yellow(),
+            "Press [Enter] to close.".dimmed()
+        );
 
+        stdout().flush().expect("Failed to flush output.");
         stdin()
             .read_line(&mut String::new())
             .expect("Failed to read line.");
-        
-        return
+
+        return;
     }
-    
-    drop(root);
 
     println!(
         "{} {}",

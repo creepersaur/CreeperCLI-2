@@ -28,7 +28,7 @@ two_way_descendants = true
     );
 
     fs::build_dir(format!("{root}/ServerScriptService/server"));
-    fs::build_dir(format!("{root}/StarterPlayerScripts/client"));
+    fs::build_dir(format!("{root}/StarterPlayer/StarterPlayerScripts/client"));
     fs::build_dir(format!("{root}/ReplicatedStorage/shared"));
 
     fs::create_file(

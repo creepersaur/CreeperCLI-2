@@ -1,11 +1,10 @@
+use std::fs;
+use std::io::Cursor;
+
+#[cfg(target_os = "windows")]
+use std::process::{exit, Command};
+
 use colored::Colorize;
-use curl::easy::{Easy, WriteError};
-use std::fs::File;
-use std::io::{copy, Read, Write};
-use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::{env, fs};
-use zip::ZipArchive;
 
 #[cfg(target_os = "windows")]
 static OS: &str = "windows";
@@ -14,205 +13,201 @@ static OS: &str = "linux";
 #[cfg(target_os = "macos")]
 static OS: &str = "macos";
 
+#[cfg(target_os = "windows")]
+const FILE_NAME: &str = "creeper_cli-x86_64-pc-windows-msvc.zip";
+#[cfg(target_os = "linux")]
+const FILE_NAME: &str = "creeper_cli-x86_64-unknown-linux-gnu.tar.gz";
+#[cfg(target_os = "macos")]
+const FILE_NAME: &str = "creeper_cli-x86_64-apple-darwin.tar.gz";
+
 pub fn update_cli() -> Result<(), Box<dyn std::error::Error>> {
-    println!("{}", "Attempting to update...".dimmed());
+    println!("Attempting to update!");
 
-    let current_exe = env::current_exe()?;
-    let current_exe_name = current_exe.file_name().unwrap().to_str().unwrap();
-    let output_dir = current_exe.parent().unwrap();
-    let temp_dir = env::temp_dir();
+    let latest_release_url =
+        "https://api.github.com/repos/creepersaur/creepercli-2/releases/latest";
+    let client = reqwest::blocking::Client::new();
 
-    let install_file = match OS {
-        "windows" => "creeper_cli-x86_64-pc-windows-msvc.zip",
-        "linux" => "creeper_cli-x86_64-unknown-linux-gnu.tar.gz",
-        "macos" => "creeper_cli-x86_64-apple-darwin.tar.gz",
-        _ => return Err("Unsupported operating system".into()),
-    };
+    print!("{}", "Getting latest version assets... ".dimmed());
 
-    let download_url = format!(
-        "https://github.com/creepersaur/CreeperCLI-2/releases/latest/download/{}",
-        install_file
-    );
+    let response = client
+        .get(latest_release_url)
+        .header(reqwest::header::USER_AGENT, "creepercli-updater")
+        .send()?
+        .json::<serde_json::Value>()?;
 
-    println!("{download_url}");
+    let assets = response["assets"].as_array().ok_or("No assets found")?;
+    let download_url = assets
+        .iter()
+        .find(|asset| {
+            asset["name"]
+                .as_str()
+                .map_or(false, |name| name.contains(FILE_NAME))
+        })
+        .and_then(|asset| asset["browser_download_url"].as_str())
+        .ok_or("Asset not found")?;
 
-    let temp_zip_path = temp_dir.join(install_file);
-    let bytes_downloaded = download_zip(download_url, temp_zip_path.to_str().unwrap())?;
-    println!(
-        "Download successful: {} ({} bytes)",
-        temp_zip_path.display(),
-        bytes_downloaded
-    );
+    println!("{}", "Latest release assets found.".dimmed());
+    print!("{}", "Downloading assets... ".dimmed());
 
-    let file_size = verify_file(&temp_zip_path)?;
-    println!("File verification successful. Size: {} {}", file_size.to_string().purple(), "bytes".purple());
+    let response = client
+        .get(download_url)
+        .header(reqwest::header::USER_AGENT, "creepercli-updater")
+        .send()?;
+    let bytes = response.bytes()?;
 
-    let temp_exe_path = temp_dir.join("creeper_cli.exe");
-    unzip_file(temp_zip_path.to_str().unwrap(), temp_dir.to_str().unwrap())?;
-    println!("{}", "Extraction successful".dimmed());
+    println!("{}", "Downloaded zip file.".dimmed());
+    print!("{}", "Extracting compressed file... ".dimmed());
 
-    if !temp_exe_path.exists() {
-        return Err("Extracted executable not found".into());
+    if OS == "windows" {
+        unzip_and_replace(&bytes)?;
+    } else {
+        untar_and_replace(&bytes)?;
     }
 
-    let script_path = output_dir.join("update_creeper_cli.ps1");
-    let update_script = create_update_script(
-        &current_exe,
-        &temp_exe_path,
-        &output_dir.join(current_exe_name),
-        &script_path
-    );
-
-    fs::write(&script_path, update_script)?;
-
-    println!("{}", "Update prepared successfully.".green());
-    println!("{}", "Finalizing update...".dimmed());
-
-    let powershell_output = Command::new("powershell")
-        .args(&[
-            "-Command",
-            format!(
-                "powershell -ExecutionPolicy Bypass -File \"{}\"",
-                script_path.display()
-            )
-            .as_str(),
-        ])
-        .spawn();
-
-    if let Err(output) = powershell_output {
-        eprintln!(
-            "{} {}\n{}",
-            "Error".red(),
-            "Failed to execute powershell Script.",
-            output.to_string()
-        );
-        return Ok(());
-    }
-
-    println!("{}", "Update was successful!!!".green());
-
-    std::process::exit(0);
-}
-
-fn verify_file(path: &PathBuf) -> Result<u64, std::io::Error> {
-    let metadata = fs::metadata(path)?;
-    let file_size = metadata.len();
-
-    if file_size == 0 {
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::InvalidData,
-            "Downloaded file is empty",
-        ));
-    }
-
-    let mut file = File::open(path)?;
-    let mut buffer = [0; 4];
-    file.read_exact(&mut buffer)?;
-
-    // Check if it's a zip file (starts with PK\x03\x04)
-    if &buffer != b"PK\x03\x04" {
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::InvalidData,
-            "File is not a valid zip archive",
-        ));
-    }
-
-    Ok(file_size)
-}
-
-fn download_zip(url: String, output_path: &str) -> Result<u64, Box<dyn std::error::Error>> {
-    let mut easy = Easy::new();
-    easy.url(&url)?;
-    easy.follow_location(true)?; // Follow redirects if any
-
-    let mut file = File::create(output_path)?;
-    let mut bytes_downloaded = 0;
-
-    {
-        let mut transfer = easy.transfer();
-        transfer.write_function(|data| match file.write_all(data) {
-            Ok(_) => {
-                bytes_downloaded += data.len() as u64;
-                Ok(data.len())
-            }
-            Err(_) => Err(WriteError::Pause),
-        })?;
-        transfer.perform()?;
-    }
-
-    let response_code = easy.response_code()?;
-    if response_code != 200 {
-        return Err(format!("HTTP error: {}", response_code).into());
-    }
-
-    if bytes_downloaded == 0 {
-        return Err("No data downloaded".into());
-    }
-
-    Ok(bytes_downloaded)
-}
-
-fn unzip_file(zip_path: &str, extract_path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let zip_file = File::open(zip_path)?;
-    let mut archive = ZipArchive::new(zip_file)?;
-
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i)?;
-        let out_path = Path::new(extract_path).join(file.name());
-
-        if file.is_dir() {
-            fs::create_dir_all(&out_path)?;
-        } else {
-            if let Some(parent) = out_path.parent() {
-                if !parent.exists() {
-                    fs::create_dir_all(&parent)?;
-                }
-            }
-            let mut outfile = File::create(&out_path)?;
-            copy(&mut file, &mut outfile)?;
-        }
-    }
     Ok(())
 }
 
-fn create_update_script(current_exe: &PathBuf, temp_exe: &PathBuf, target_exe: &PathBuf, script_path: &PathBuf) -> String {
-    format!(
+fn unzip_and_replace(zip_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    let reader = Cursor::new(zip_data);
+    let mut zip = zip::ZipArchive::new(reader)?;
+
+    for i in 0..zip.len() {
+        let mut file = zip.by_index(i)?;
+        if file.name().ends_with(".exe") {
+            let mut out_file = fs::File::create("creeper_cli_new.exe")?;
+            std::io::copy(&mut file, &mut out_file)?;
+            break;
+        }
+    }
+
+    println!("{}", "Extracted file successfully.".dimmed());
+    println!("{}", "Replacing binary...".dimmed());
+
+    // Create a batch script to replace the running executable
+    let current_exe = std::env::current_exe()?;
+    let current_exe_str = current_exe.to_str().unwrap();
+
+    let batch_script_content = format!(
         r#"
-$ErrorActionPreference = "Stop"
-$currentExe = "{}"
-$tempExe = "{}"
-$targetExe = "{}"
-
-Write-Host "Waiting for current process to exit..."
-Start-Sleep -Seconds 2
-
-try {{
-    if (Test-Path $currentExe) {{
-        Remove-Item $currentExe -Force
-        Write-Host "Removed old executable."
-    }}
+        @echo off
+        color 0A
+        timeout /t 2 /nobreak >nul
+        move /Y creeper_cli_new.exe "{current_exe_str}"
+    echo Successfully updated CreeperCLI-2! You may close this window.
     
-    Move-Item $tempExe $targetExe -Force
-    Write-Host "Moved new executable to target location."
-    
-    if (Test-Path $targetExe) {{
-        Write-Host "Update successful!"
-    }} else {{
-        throw "Failed to move new executable to target location."
-    }}
-}} catch {{
-    Write-Host "Error during update: $_"
-    exit 1
-}}
+    color 07
+    exit
+        "#,
+        current_exe_str = current_exe_str
+    );
 
-Write-Host "Update process completed."
-del {}
-Stop-Process -Id $PID
-exit
-"#,
-        current_exe.display(),
-        temp_exe.display(),
-        target_exe.display(),
-        script_path.display()
-    )
+    let temp_dir = std::env::temp_dir();
+    let batch_file_path = temp_dir.join("update.bat");
+    let batch_file_path_str = batch_file_path.to_str().unwrap();
+    fs::write(batch_file_path_str, batch_script_content)?;
+
+    println!("{}", "Successfully updated CreeperCLI-2! 👍".bright_green());
+
+    // Run the batch script
+    Command::new("cmd")
+        .args(&["/C", "start", batch_file_path_str])
+        .spawn()?;
+
+    // Exit the current process so the batch can complete the replacement
+    exit(0);
 }
+
+fn untar_and_replace(tar_gz_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    use flate2::read::GzDecoder;
+    use tar::Archive;
+
+    let tar = GzDecoder::new(Cursor::new(tar_gz_data));
+    let mut archive = Archive::new(tar);
+
+    for entry in archive.entries()? {
+        let mut entry = entry?;
+        let path = entry.path()?.into_owned();
+        if path.file_name().map_or(false, |name| name == "creeper_cli") {
+            entry.unpack("creeper_cli")?;
+            break;
+        }
+    }
+
+    println!("{}", "Extracted file successfully.".dimmed());
+    println!("{}", "Replacing binary...".dimmed());
+
+    replace_current_exe("creeper_cli")?;
+    Ok(())
+}
+
+fn replace_current_exe(new_exe_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let current_exe = std::env::current_exe()?;
+
+    if OS == "windows" {
+        return Err("Replacement is handled by batch script.".into());
+    } else {
+        fs::rename(new_exe_path, current_exe)?;
+    }
+
+    println!("{}", "Binary successfully replaced!".dimmed());
+    println!("{}", "Successfully updated CreeperCLI-2! 👍".bright_green());
+
+    Ok(())
+}
+
+/*
+pub fn update_cli() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Attempting to update!");
+    print!("{}", "Downloading zip file... ".dimmed());
+
+    let exe_path = env::current_exe()?;
+    let mut file_path = exe_path.clone();
+    file_path.pop();
+    file_path.push("creeper_cli_downloaded.zip");
+
+    fs::rename(&exe_path, "delete_this")?;
+
+    println!("{}", file_path.display().to_string().yellow());
+
+    let file_stem = match OS {
+        "windows" => "pc-windows-msvc.zip",
+        "linux" => "unknown-linux-gnu.tar.gz",
+        "macos" => "apple-darwin.tar.gz",
+        _ => {
+            println!("{}", "Your operating system is incompatible!".red());
+            "error"
+        }
+    };
+    if file_stem == "error" {
+        return Ok(())
+    }
+
+    let url = format!(
+        "https://github.com/creepersaur/CreeperCLI-2/releases/latest/download/creeper_cli-x86_64-{}",
+        file_stem
+    );
+    let mut response = reqwest::blocking::get(url)?;
+
+    let mut dest = File::create(&exe_path)?;
+    copy(&mut response, &mut dest)?;
+
+    println!("{}", "Download completed successfully".dimmed());
+    print!("{}", "Extracting zip file... ".dimmed());
+
+    let zip_file = File::open(&exe_path)?;
+    let mut zip = ZipArchive::new(zip_file)?;
+    zip.extract(Path::new(""))?;
+
+    println!("{}", "Zip extraction successful.".dimmed());
+    print!("{}", "Deleting zip file... ".dimmed());
+
+    // fs::remove_file(&exe_path)?;
+    fs::remove_file("delete_this")?;
+
+    println!("{}", "Deleted zip file.".dimmed());
+
+    println!("{}", "CREEPERCLI UPDATED SUCCESSFULLY! 👍".bright_green());
+    Ok(())
+}
+
+*/

@@ -96,7 +96,7 @@ pub fn write_file(path: String, contents: String, file_type: String) {
         "{root_path}/{path}.{}",
         match file_type.as_str() {
             "server" => "server.lua",
-            "client" => "server.lua",
+            "client" => "client.lua",
             "json" => "json",
             "toml" => "toml",
             _ => "lua",

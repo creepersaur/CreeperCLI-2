@@ -1,5 +1,7 @@
 use std::fs;
 use std::io::Cursor;
+
+#[cfg(target_os = "windows")]
 use std::process::{exit, Command};
 
 use colored::Colorize;
@@ -65,7 +67,6 @@ pub fn update_cli() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-#[cfg(target_os = "windows")]
 fn unzip_and_replace(zip_data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
     let reader = Cursor::new(zip_data);
     let mut zip = zip::ZipArchive::new(reader)?;

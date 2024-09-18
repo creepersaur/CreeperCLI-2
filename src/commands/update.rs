@@ -1,9 +1,6 @@
 use std::fs;
 use std::io::Cursor;
-
-#[cfg(target_os = "windows")]
 use std::process::{exit, Command};
-
 use colored::Colorize;
 
 #[cfg(target_os = "windows")]

@@ -18,7 +18,7 @@ lazy_static! {
 async fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 {
-        commands::run_command(args);
+        commands::run_command(args).await;
     } else {
         run_server::start().await;
     }

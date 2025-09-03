@@ -6,6 +6,11 @@
 
 </div>
 
+> [!CAUTION]
+> ## CREEPERCLI-2 HAS BEEN ARCHIVED AND IS NO LONGER MAINTAINED.
+> You may still download it, and the rust exe part works if someone wants to use it, however the plugin may break.
+> I suggest using an older (latest working) version of creepercli-2 if you're going to use it.
+
 ## What is it?
 Have you ever wanted to push your script files from your computer to Roblox Studio directly?
 Well with CreeperCLI, you can do that. It's extremely simple, and it's easier to use than Rojo.
